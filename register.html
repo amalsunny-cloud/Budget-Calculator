@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="shortcut icon" href="./images/budget.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <style>
+       .registerForm{
+        width: 350px;
+        background-color: rgb(238, 255, 238);
+        border: 0.5px solid rgb(230, 230, 230);
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.186);
+        border-radius: 20px;
+
+
+      }
+    </style>
+</head>
+<body>
+
+  <div class="mainRegister d-flex justify-content-center mt-5 ">
+    <div class="registerForm m-5 p-4 ">
+    <label for="UserName">User Name : </label>
+    <input type="text" placeholder="User Name" id="uname"  class="mt-3 form-control"><br>
+
+    <label for="Password">Password : </label>
+    <input type="password" placeholder="Password" id="pswrd"  class="mt-3 form-control"><br>
+
+    <label for="ConfirmPassword">Confirm Password : </label>
+    <input type="password" placeholder="Confirm Password" id="cnfrmPswrd"  class="mt-3 form-control"><br>
+
+    <center>
+      <button class="btn btn-primary p-2 mb-2" onclick="saveRegister()">Register</button>
+      <p id="inputTextError"></p>
+      <p id="pswrdText"></p>
+
+
+      <p>Have Account?</p>
+
+      <button class="loginButton btn btn-success p-2 " onclick="login()">Login</button>
+    </center>
+
+  </div>
+</div>
+
+    <script>
+        function saveRegister(){
+          let uname = document.getElementById('uname').value;
+          let pswrd = document.getElementById('pswrd').value;
+          let cnfrmPswrd = document.getElementById('cnfrmPswrd').value;
+
+
+          if(!uname || !pswrd || !cnfrmPswrd){
+            let inputError = document.getElementById('inputTextError');
+            inputError.innerHTML = "Enter All fields."
+            inputError.style.color = "red";
+
+            setTimeout(() => {
+              inputError.innerHTML = "";
+             }, 2000);
+            return;
+          }
+
+          if(pswrd !== cnfrmPswrd){
+             let inputTextError = document.getElementById('inputTextError')
+             inputTextError.innerHTML = "Password do not matches";
+             inputTextError.style.color = "Red";
+
+
+             setTimeout(() => {
+              inputTextError.innerHTML = "";
+             }, 2000);
+             return;
+          }
+
+          localStorage.setItem("UserName",uname);
+          localStorage.setItem("Password",pswrd);
+
+            alert("Account Created Successfully!");
+            window.location='./index.html';
+       
+        }
+
+        function login(){
+          window.location = "./index.html";
+        }
+    </script>
+</body>
+</html>

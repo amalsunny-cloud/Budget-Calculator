@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Calculator</title>
+    <link rel="shortcut icon" href="./images/budget.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .expense-list {
+            margin-top: 30px;
+        }
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .layer {
+            height: 70px;
+            width: 100%;
+            background: url("./images/budget1.jpg");
+        }
+        .firstHeading {
+            position: absolute;
+            top: 10px;
+            left: 40%;
+        }
+        .firstDiv {
+            margin-top: 50px;
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .input-group {
+            margin-bottom: 15px; 
+        }
+        .button-container {
+            text-align: center; 
+            margin: 20px 0; 
+        }
+        .chart-container {
+            display: flex;
+            justify-content: center; 
+            margin-top: 50px; 
+            padding: 20px; 
+        }
+        .chart {
+            padding: 10px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            background-color: white; 
+            margin: 0 10px; 
+            flex: 1; 
+            max-width: 500px; 
+        }
+        .image1{
+            position: absolute;
+            top: 125px;
+        }
+        .logoutBtn{
+            position: absolute;
+            top: 70px;
+            right: 0px;
+        }
+        .mainLogoHead{
+            position: absolute;
+            top: 10px;
+            left: 50px;
+        }
+        .mainHead{
+            position: absolute;
+            top: 15px;
+            left: 110px;
+            color: rgb(210, 255, 182);
+        }
+       .one{
+            color: rgb(255, 1, 1);
+        }
+        .two{
+            color: green;
+        }
+        .three{
+            position: absolute;
+            top: 25px;
+            left: 300px;
+            font-size: 18px;
+        }
+        #barChart,#pieChart{
+            padding: 30px;
+        }
+        #barChart{
+            padding-top: 0px;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layer"></div>
+    <img class="image1" src="./images/budgetCalculating.jpg" width="400px" alt="">
+    <button class="logoutBtn btn btn-danger text-light" onclick="logOut()">Log Out</button>
+    <img class="mainLogoHead" src="./images/budget.png" width="50px" alt="">
+    <h2 class="mainHead"><span class="one">Budget</span><span class="two">Wise</span> </h2>
+    <p class="three">- Budget Calculator</p>
+    <center>
+    <div class="container d-flex justify-content-center pt-5 mt-3 mb-4">
+        <h1 class="firstHeading"></h1>
+        
+        <div class="firstDiv m-3 p-3">
+            <div class="input-group">
+                <label for="AddAmount" class="input-group-text">Enter Amount:</label>
+                <input type="text" placeholder="Enter Amount" id="AddAmount" class="form-control">
+            </div>
+            <div class="input-group">
+                <label for="AddCategory" class="input-group-text">Enter Category:</label>
+                <input type="text" placeholder="Enter Category" id="AddCategory" class="form-control">
+            </div>
+            <div class="button-container">
+                <button onclick="save()" class="btn btn-primary mt-2">Save</button>
+            </div>
+
+            <div class="button-container">
+                <button onclick="sortExpenses('asc')" class="btn btn-secondary mt-2">Sort Amount (Asc)</button>
+                <button onclick="sortExpenses('desc')" class="btn btn-secondary mt-2">Sort Amount (Desc)</button>
+            </div>
+        
+            <h3 class="mt-4">Total Expenses: ₹<span id="totalAmount">0</span></h3>
+            <div class="expense-list" id="expenseList"></div>
+        </div>
+    </center>
+    </div>
+
+    <h1 class="text-center mt-5" style="color: #ff9e03;text-decoration: underline;">Expense Breakdown</h1>
+    <div class="chart-container m-3 p-5">
+        <div class="chart text-center m-5 pb-4">
+            <h2 class="p-3"> Pie Chart</h2>
+            <canvas id="pieChart" width="200" height="200"></canvas>            
+        </div>
+        <div class="chart text-center  m-5 pb-4">
+            <h2 class="p-3">Bar Chart</h2>
+            <canvas id="barChart" width="300" height="200"></canvas> 
+        </div>
+    </div>
+
+
+
+    <script>
+        let totalExpenses = 0;
+        let expenses = [];
+        let pieChartInstance = null;
+        let barChartInstance = null;
+    
+        function save() {
+            let addamount = document.getElementById('AddAmount').value;
+            let addcategory = document.getElementById('AddCategory').value;
+            let amount = parseFloat(addamount);
+            
+            if (isNaN(amount) || addcategory === '') {
+                alert('Please enter a valid amount and category.');
+                return;
+            }
+    
+            expenses.push({ amount: amount, category: addcategory });
+            totalExpenses += amount;
+    
+            updateExpenseList();
+            updateTotalAmount();
+            updateCharts();
+    
+            document.getElementById('AddAmount').value = '';
+            document.getElementById('AddCategory').value = '';
+        }
+    
+        function updateExpenseList() {
+            let expenseList = document.getElementById('expenseList');
+            expenseList.innerHTML = '';
+    
+            expenses.forEach((expense, index) => {
+                let expenseItem = document.createElement('div');
+                expenseItem.className = 'expense-item';
+    
+                expenseItem.innerHTML = `
+                    <span>• ${expense.category}: ₹${expense.amount}</span>
+                    <button class="btn btn-danger btn-sm" onclick="deleteExpense(${index})">Delete</button>
+                `;
+    
+                expenseList.appendChild(expenseItem);
+            });
+        }
+    
+        function updateTotalAmount() {
+            document.getElementById('totalAmount').innerText = totalExpenses.toFixed(2);
+        }
+    
+        function deleteExpense(index) {
+            totalExpenses -= expenses[index].amount;
+            expenses.splice(index, 1);
+            updateExpenseList();
+            updateTotalAmount();
+            updateCharts();
+        }
+    
+        function updateCharts() {
+            let categories = expenses.map(expense => expense.category);
+            let amounts = expenses.map(expense => expense.amount);
+    
+            let pieCtx = document.getElementById('pieChart').getContext('2d');
+            if (pieChartInstance) {
+                pieChartInstance.data.labels = categories;
+                pieChartInstance.data.datasets[0].data = amounts;
+                pieChartInstance.update();
+            } else {
+                pieChartInstance = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            data: amounts,
+                            backgroundColor: ['#FF6384','#9fd3c7', '#36A2EB','#a2a8d3', '#FFCE56','#dfd3c3', '#4BC0C0', '#9966FF', '#FF9F40'],
+                        }]
+                    }
+                });
+            }
+    
+            let barCtx = document.getElementById('barChart').getContext('2d');
+            if (barChartInstance) {
+                barChartInstance.data.labels = categories;
+                barChartInstance.data.datasets[0].data = amounts;
+                barChartInstance.update();
+            } else {
+                barChartInstance = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            label: 'Expense Amount',
+                            data: amounts,
+                            backgroundColor: ['#FF6384','#9fd3c7', '#36A2EB','#a2a8d3', '#FFCE56','#dfd3c3', '#4BC0C0', '#9966FF', '#FF9F40'],
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutBounce'
+                    }
+                });
+            }
+        }
+    
+        function sortExpenses(order) {
+            expenses.sort((a, b) => {
+                if (order === 'asc') {
+                    return a.amount - b.amount;
+                } else {
+                    return b.amount - a.amount;
+                }
+            });
+    
+            updateExpenseList();
+            updateCharts();
+        }
+    
+        function logOut(){
+            window.location = "./index.html";
+        }
+    </script>
+    
+    
